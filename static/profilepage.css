@@ -15,6 +15,11 @@
     gap: 5em;
     /* font-size: 0.6em; */
   }
+  select{
+    padding: 0.5em 4.5em;
+    border-radius: 5px;
+    font-size: 0.9em;
+  }
   .header{
     background: black;
     border: 2px solid black;
@@ -112,6 +117,7 @@ color: white;
   justify-content: center;
   background: #ffffff;
   transition: opacity 1s, visibility 1s;
+  z-index: 100;
 }
 
 .loader--hidden {
@@ -274,3 +280,4 @@ html {
   color: white;
 
 }
+

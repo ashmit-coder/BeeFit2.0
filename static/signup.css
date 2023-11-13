@@ -11,8 +11,7 @@ body{
 }
 .main{
 	width: 350px;
-	height: 450px;
-	/* background: rgb(221, 221, 19); */
+	height: 600px;
 	background:white;
 	overflow: hidden;
 	/* background: url("https://doc-08-2c-docs.googleusercontent.com/docs/securesc/68c90smiglihng9534mvqmq1946dmis5/fo0picsp1nhiucmc0l25s29respgpr4j/1631524275000/03522360960922298374/03522360960922298374/1Sx0jhdpEpnNIydS4rnN4kHSJtU1EyWka?e=view&authuser=0&nonce=gcrocepgbb17m&user=03522360960922298374&hash=tfhgbs86ka6divo3llbvp93mg4csvb38") no-repeat center/ cover; */
@@ -38,12 +37,12 @@ label{
 	cursor: pointer;
 	transition: .5s ease-in-out;
 }
-input, select{
+input{
 	width: 60%;
 	height: 20px;
 	/* background: #e0dede; */
 	background: #000;
-	color: aqua;
+	color: white;
 	justify-content: center;
 	display: flex;
 	margin: 20px auto;
@@ -54,7 +53,7 @@ input, select{
 }
 button{
 	width: 60%;
-	height: 40px;
+	height: 30px;
 	margin: 10px auto;
 	justify-content: center;
 	display: block;
@@ -71,11 +70,11 @@ button{
 	cursor: pointer;
 }
 button:hover{
-	background: rgb(211, 211, 19);
+	background: rgb(52, 52, 52);
 }
 .login{
-	height: 500px;
-	background: yellow;
+	height: 600px;
+	background: #DDDDDD;
 	border-radius: 60% / 10%;
 	transform: translateY(-180px);
 	transition: .8s ease-in-out;
@@ -87,7 +86,7 @@ button:hover{
 }
 
 #chk:checked ~ .login{
-	transform: translateY(-500px);
+	transform: translateY(-600px);
 }
 #chk:checked ~ .login label{
 	transform: scale(1);	
@@ -120,11 +119,11 @@ button:hover{
     content: "";
 	background: url(Images/wired-outline-1186-honeycombs.gif);
   }
-  
-.btn{
+
+  .btn{
 	height: 3em;
   }
-.btn:hover{
+  .btn:hover{
 	background: rgb(55, 55, 55);
 	cursor: pointer;
   }

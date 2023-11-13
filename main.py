@@ -23,6 +23,7 @@ fields_details = ["ID","age","weight","height","blood group"]
 calorie_field = ["Id","Date","Calories"]
 calories_burnt = ['ID','Burnt calories','Date']
 feedback_field = ['ID','feedback']
+Gender_field = ['Id','Gender']
 
 # quote class with various fucntions to randomly generate quotes and return the writer and quote
 class quotes:
@@ -120,6 +121,18 @@ class calorie_functions:
 
 # class to return the absolute pathing of all our datasets and is system independent
 class file_id:
+
+
+    def genderData():
+        cwd = os.getcwd()
+        if platform == 'win32':
+            working_dir = cwd + r"\resources"
+            working_file = working_dir + r"\Gender.csv"
+        elif platform == 'darwin' or platform =='linux':
+            working_dir = cwd + "/resources"
+            working_file = working_dir + "/Gender.csv"
+        
+        return working_file
 
     def feedback_form():
         cwd = os.getcwd()
@@ -325,16 +338,25 @@ def mainpage():
 @app.route('/profilepage',methods=['GET','POST'])
 def profilepage():
     if 'Id' in session:            
-        data = retriveData()
         if request.method == 'POST':
-            data['Name'] = request.form['name']
-            data['BloodGroup'] = request.form['Blood']
-            data['Age'] = request.form['age']
-            data['Height'] = request.form['height']
-            data['Weight'] = request.form['weight']
-            data['BMI'] = request.form['Your BMI']
+            
+            Gender = request.form['Gender']
+            BloodGroup = request.form['Blood']
+            Age = request.form['age']
+            Height = request.form['height']
+            Weight = request.form['weight']
+            updateData(BloodGroup,Age,Height,Weight,Gender)
+            
+            data = retriveData()
+            
+            return render_template('profile_page.html',name = data['Name'],gender = data['Gender'],bloodGroup = data['BloodGroup'],age = data['Age'],height = data['Height'],weight=data['Weight'],bmi = data['BMI'],idealWeight = data['IdealWeight'])
+        
+        else:
+            data = retriveData()
+            return render_template('profile_page.html',name = data['Name'],gender=data['Gender'],bloodGroup = data['BloodGroup'],age = data['Age'],height = data['Height'],weight=data['Weight'],bmi = data['BMI'],idealWeight = data['IdealWeight'])
 
-        return render_template('profile_page.html',name = data['Name'],bloodGroup = data['BloodGroup'],age = data['Age'],height = data['Height'],weight=data['Weight'],bmi = data['BMI'],idealWeight = data['IdealWeight'])
+
+        return render_template('profile_page.html',name = data['Name'],gender=data['Gender'],bloodGroup = data['BloodGroup'],age = data['Age'],height = data['Height'],weight=data['Weight'],bmi = data['BMI'],idealWeight = data['IdealWeight'])
     else:
         return redirect('landingpage')
 # route for exercise page
@@ -349,6 +371,50 @@ def exercise():
     else:
         return redirect('landingpage')
 
+
+# more detail page
+@app.route("/accountdetail",methods=['GET','POST'])
+def accountdetail():  
+    # if First_login == 1 record the data
+    # we changed the fucntionality to directly redirect the user after 
+    if 'Id' in session:
+        Id = session['Id']
+
+        df1 = pd.read_csv(file_id.details())
+        df  = pd.read_csv(file_id.User_info())
+        First_login_list = df['First_login']
+        first_login = First_login_list[Id]
+        
+        if first_login == 1 or first_login==0:
+            if request.method == 'POST':
+                
+                age = request.form['age']
+                weight  = request.form['weight']
+                height = request.form['height']
+                blood_group = request.form['blood_group']
+                
+                df1 = df1[fields_details]
+                data = [[Id,age,weight,height,blood_group]]
+                df2 = pd.DataFrame(data,columns=fields_details)
+                df1 = df1.append(df2)
+                df1 = df1[fields_details]
+                df.at[Id,'First_login'] = 2
+                df = df[fields]
+                df.to_csv(file_id.User_info())
+                df1.to_csv(file_id.details())
+                
+                gf = pd.read_csv(file_id.genderData())
+                data1 = [[Id,"NAN"]]
+                gf1 = pd.DataFrame(data1,columns=Gender_field)
+                gf  = gf.append(gf1)
+                gf = gf[Gender_field]
+                gf.to_csv(file_id.genderData())
+                return redirect('/mainpage')
+        else:
+            return redirect('/mainpage')
+        return render_template('moredetails.html')
+    else:
+        return redirect('/signinpage')
 
 # route for exercise videos based on body parts
 @app.route('/body')
@@ -481,7 +547,8 @@ def SignUp_page():
     username = ""
     password = ""
     if request.method == 'POST':
-        if "SignUp" in request.form.keys():
+        if "Signup" in request.form.keys():
+
             username = request.form['User_name']
             Email_id = request.form['Email_id']
             Phone = request.form['Phone_number']
@@ -506,7 +573,7 @@ def SignUp_page():
             username = request.form['User_name']
             password = request.form['password']
             
-            rememberme = request.form.get('rememberme')
+    
             password_encoded = sha512(password.encode()).hexdigest()
         
             df = pd.read_csv(file_id.User_info())
@@ -529,9 +596,9 @@ def SignUp_page():
 
                 if pass_in_data == password_encoded:
                     session['Id'] = num
-                    
                     session.permanent = True   
-                         
+                             
+                   
                     del df,salt_list,log_list,password_list,user_list
                     return redirect('mainpage') # return main page here
                 else:
@@ -552,7 +619,6 @@ def SignIn_page():
         username = request.form['User_name']
         password = request.form['password']
         
-        rememberme = request.form.get('rememberme')
         password_encoded = sha512(password.encode()).hexdigest()
     
         df = pd.read_csv(file_id.User_info())
@@ -575,8 +641,7 @@ def SignIn_page():
 
             if pass_in_data == password_encoded:
                 session['Id'] = num
-                
-                session.permanent = True            
+                session.permanent = True   
        
                 del df,salt_list,log_list,password_list,user_list
                 return redirect('mainpage') # return main page here
@@ -657,7 +722,7 @@ def logout():
     session.pop('Id',None)
     session.pop('article',None)
     session.pop('date',None)
-    return redirect(url_for('SignIn_page'))
+    return redirect(url_for('landing_page'))
 
 
 # function to create an account
@@ -685,7 +750,7 @@ def account_creation(username , password,Email_id,Phone):
     df1 = df1[fields]
     df1.to_csv(file_id.User_info())
     session['Id'] = int(num)
-    return redirect("/accountdetails") #here we will redirect to our main page
+    return redirect('accountdetail') #here we will redirect to our main page
 
 #  function to record our user feedback
 def user_feedback(ID,feedback):
@@ -719,6 +784,35 @@ def bodySplitter(body):
     return less,more
 
 
+def updateData(BloodGroup,Age,Height,Weight,Gender):
+    df1 = pd.read_csv(file_id.details())
+    df  = pd.read_csv(file_id.User_info())
+    df5 = pd.read_csv(file_id.genderData())
+
+    # First_login_list = df['First_login']
+    Id = int(session['Id'])
+    df1 = df1[fields_details]
+    data = [[Id,Age,Weight,Height,BloodGroup]]
+    df2 = pd.DataFrame(data,columns=fields_details)
+    df1 = df1.append(df2)
+    df1 = df1.drop_duplicates(subset= ["ID"],keep='last')
+
+    data1 = [[Id,Gender]]
+
+    df3 = pd.DataFrame(data1,columns=Gender_field)
+    df5 = df5.append(df3)
+    
+    df5 = df5.drop_duplicates(subset=["Id"],keep='last')
+
+    df5 = df5[Gender_field]
+    df1 = df1[fields_details]
+    df = df[fields]
+
+
+
+    df.to_csv(file_id.User_info())
+    df1.to_csv(file_id.details())
+    df5.to_csv(file_id.genderData())
 
 # function to read all the data of the user and send a dict for the profile page
 def retriveData():
@@ -731,11 +825,15 @@ def retriveData():
     df = pd.read_csv(file_id.details())
     df = df[fields_details]
     df = df.loc[df['ID'] == session['Id']]
-    
+    df1 = pd.read_csv(file_id.genderData())
+    df1= df1.loc[df1['Id']==session['Id']]
+    gender = list(df1['Gender'])[0]
     weight = list(df['weight'])[0]
     age = list(df['age'])[0]
     height = list(df['height'])[0]
     blood = list(df['blood group'])[0]
+
+    data['Gender'] = gender
     data['Weight'] = weight
     data['Height'] = height
     data['Age'] = age
